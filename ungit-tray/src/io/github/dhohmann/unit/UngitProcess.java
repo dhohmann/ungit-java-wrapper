@@ -29,11 +29,17 @@ import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
+/**
+ * Main class. Creates the UI part and prepares the ungit processes.
+ * 
+ * @since 0.0.1
+ * @author Daniel Hohmann
+ *
+ */
 public class UngitProcess {
 
 	public static void main(String[] args) {
 		try {
-//			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
 			UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
 		} catch (UnsupportedLookAndFeelException ex) {
 			ex.printStackTrace();
@@ -163,7 +169,7 @@ public class UngitProcess {
 
 		settingsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO show settings
+				// TODO show settings in editor mode
 				JOptionPane.showMessageDialog(null, "Settings manipulation is currently not supported");
 			}
 		});
@@ -176,6 +182,14 @@ public class UngitProcess {
 		}));
 	}
 
+	/**
+	 * Retrieves an image in the class path
+	 * 
+	 * @param path        Path including the file name
+	 * @param description Description for the image
+	 * @return Image found in the class path or <code>null</code>, if the file was
+	 *         not found
+	 */
 	protected static Image createImage(String path, String description) {
 		URL imageURL = UngitProcess.class.getResource(path);
 		if (imageURL == null) {

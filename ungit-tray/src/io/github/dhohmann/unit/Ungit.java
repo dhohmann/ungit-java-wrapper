@@ -12,6 +12,13 @@ import java.net.URISyntaxException;
 
 import javax.swing.JOptionPane;
 
+/**
+ * Ungit wrapper class.
+ * 
+ * @since 0.0.1
+ * @author Daniel Hohmann
+ *
+ */
 public class Ungit implements Runnable {
 
 	private static String ungitCommand = null;
@@ -50,6 +57,10 @@ public class Ungit implements Runnable {
 		}
 	}
 
+	/**
+	 * Starts the ungit service thread. While a thread is running, additional calls
+	 * will be ignored and a message is displayed instead.
+	 */
 	public void start() {
 		if (this.isRunning()) {
 			JOptionPane.showMessageDialog(null, "Ungit is already running");
@@ -58,6 +69,10 @@ public class Ungit implements Runnable {
 		new Thread(this, "ungit-service").start();
 	}
 
+	/**
+	 * Process builder process
+	 */
+	@Override
 	public void run() {
 		try {
 			ProcessBuilder processBuilder = new ProcessBuilder(getExecutorCommand(), ungitCommand);
@@ -72,16 +87,32 @@ public class Ungit implements Runnable {
 		}
 	}
 
+	/**
+	 * Retrieves the running state of ungit.
+	 * 
+	 * @return <code>true</code>, if an ungit process is already managed by Java
+	 */
 	public boolean isRunning() {
 		return this.process != null && this.process.isAlive();
 	}
 
+	/**
+	 * Stops the ungit process
+	 */
 	public void stop() {
 		if (isRunning()) {
 			this.process.destroyForcibly();
 		}
 	}
 
+	/**
+	 * Opens the provided URL
+	 * 
+	 * @param url URL to open in the browser
+	 * @throws IOException        if no default browser could be found
+	 * @throws URISyntaxException if the provided URL is not transferable into an
+	 *                            URI
+	 */
 	public void open(String url) throws IOException, URISyntaxException {
 		if (!this.isRunning()) {
 			this.start();
@@ -96,6 +127,12 @@ public class Ungit implements Runnable {
 		return executor;
 	}
 
+	/**
+	 * Retrieves the ungit version running on the local machine.
+	 * 
+	 * @return <code>undefined</code>, if ungit was not found or if the version
+	 *         could not be determined, the version String otherwise
+	 */
 	public static String getVersion() {
 		String version = "undefined";
 		try {
@@ -119,6 +156,11 @@ public class Ungit implements Runnable {
 
 	}
 
+	/**
+	 * Retrieves the ungit settings for the default location
+	 * 
+	 * @return Settings object
+	 */
 	public static UngitSettings getSettings() {
 		return settings;
 	}
