@@ -3,6 +3,8 @@ package io.github.dhohmann.ungit;
 import java.awt.AWTException;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -10,15 +12,21 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -98,53 +106,87 @@ public class UngitProcess {
 		}
 
 		aboutItem.addActionListener(new ActionListener() {
+			private JDialog dialog;
+
 			public void actionPerformed(ActionEvent e) {
-
-				JEditorPane jEditorPane = new JEditorPane();
-				jEditorPane.setEditable(false);
-				JScrollPane scrollPane = new JScrollPane(jEditorPane);
-				HTMLEditorKit kit = new HTMLEditorKit();
-				jEditorPane.setEditorKit(kit);
-				StyleSheet styleSheet = kit.getStyleSheet();
-				styleSheet.addRule("body {color:#000; font-family:times; margin: 4px; }");
-				styleSheet.addRule("h1 {color: blue;}");
-				styleSheet.addRule("h2 {color: #ff0000;}");
-				styleSheet.addRule("pre {font : 10px monaco; color : black; background-color : #fafafa; }");
-
-				StringBuilder html = new StringBuilder("<html>");
-				html.append("<div>Ungit is running on version ").append(Ungit.getVersion()).append("</div");
-				html.append("<div>").append("<h2>License Information</h2>");
-				html.append("<table>");
-				html.append("<tr><th>Library/Framework</th><th>Licence</th></tr>");
-				html.append(
-						"<tr><td>org.json</td><td><a href=\"https://github.com/stleary/JSON-java/blob/master/LICENSE\">See here</a></td></tr>");
-				html.append("</table>");
-				html.append("</div>");
-				html.append("</html>");
-
-				Document doc = kit.createDefaultDocument();
-				jEditorPane.setDocument(doc);
-				jEditorPane.setText(html.toString());
-				jEditorPane.addHyperlinkListener(new HyperlinkListener() {
-
+				if (dialog != null) {
+					java.awt.EventQueue.invokeLater(() -> {
+						dialog.toFront();
+						dialog.repaint();
+					});
+					return;
+				}
+				dialog = new JDialog((JFrame) null, "About");
+				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				dialog.addWindowListener(new WindowAdapter() {
 					@Override
-					public void hyperlinkUpdate(HyperlinkEvent e) {
-						try {
-							if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-								Desktop.getDesktop().browse(e.getURL().toURI());
-							}
-						} catch (IOException | URISyntaxException e1) {
-							e1.printStackTrace();
-						}
-
+					public void windowClosed(WindowEvent e) {
+						dialog = null;
 					}
 				});
-
-				JDialog dialog = new JDialog((JFrame) null, "About");
-				dialog.getContentPane().add(scrollPane);
+				
+				JPanel processIndicator = new JPanel();
+				processIndicator.setLayout(new GridBagLayout());
+				JProgressBar processbar = new JProgressBar();
+				processbar.setIndeterminate(true);
+				processIndicator.add(processbar, new GridBagConstraints());
+				dialog.getContentPane().add(processIndicator);
 				dialog.setSize(new Dimension(300, 200));
 				dialog.setLocationRelativeTo(null);
-				dialog.setVisible(true);
+				
+				java.awt.EventQueue.invokeLater(()->{
+					dialog.setVisible(true);
+				});
+				
+				
+
+				ExecutorService service = Executors.newSingleThreadExecutor();
+				service.execute(() -> {
+					JEditorPane jEditorPane = new JEditorPane();
+					jEditorPane.setEditable(false);
+					JScrollPane scrollPane = new JScrollPane(jEditorPane);
+					HTMLEditorKit kit = new HTMLEditorKit();
+					jEditorPane.setEditorKit(kit);
+					StyleSheet styleSheet = kit.getStyleSheet();
+					styleSheet.addRule("body {color:#000; font-family:times; margin: 4px; }");
+					styleSheet.addRule("h1 {color: blue;}");
+					styleSheet.addRule("h2 {color: #ff0000;}");
+					styleSheet.addRule("pre {font : 10px monaco; color : black; background-color : #fafafa; }");
+
+					StringBuilder html = new StringBuilder("<html>");
+					html.append("<div>Ungit is running on version ").append(Ungit.getVersion()).append("</div");
+					html.append("<div>").append("<h2>License Information</h2>");
+					html.append("<table>");
+					html.append("<tr><th>Library/Framework</th><th>Licence</th></tr>");
+					html.append(
+							"<tr><td>org.json</td><td><a href=\"https://github.com/stleary/JSON-java/blob/master/LICENSE\">See here</a></td></tr>");
+					html.append("</table>");
+					html.append("</div>");
+					html.append("</html>");
+
+					Document doc = kit.createDefaultDocument();
+					jEditorPane.setDocument(doc);
+					jEditorPane.setText(html.toString());
+					jEditorPane.addHyperlinkListener(new HyperlinkListener() {
+
+						@Override
+						public void hyperlinkUpdate(HyperlinkEvent e) {
+							try {
+								if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+									Desktop.getDesktop().browse(e.getURL().toURI());
+								}
+							} catch (IOException | URISyntaxException e1) {
+								e1.printStackTrace();
+							}
+
+						}
+					});
+					dialog.getContentPane().remove(processIndicator);
+					dialog.getContentPane().add(scrollPane);
+					dialog.getContentPane().repaint();
+					dialog.revalidate();
+				});
+				
 			}
 		});
 
