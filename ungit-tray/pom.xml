@@ -8,9 +8,29 @@
 	<version>0.1.0</version>
 	<name>ungit-tray</name>
 
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/dhohmann/ungit-java-wrapper</url>
+		<connection>scm:git:git://github.com/dhohmann/ungit-java-wrapper.git</connection>
+		<developerConnection>scm:git:git@github.com:dhohmann/ungit-java-wrapper.git</developerConnection>
+	</scm>
+
+	<issueManagement>
+		<url>https://github.com/dhohmann/ungit-java-wrapper/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
+
 	<properties>
 		<mainClass>io.github.dhohmann.ungit.UngitProcess</mainClass>
 	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -39,7 +59,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.1.1</version>
 				<configuration>
@@ -52,14 +71,54 @@
 					</archive>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${mainClass}</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>2.0.0</version>
+				<executions>
+					<execution>
+						<id>bundle-licenses</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>aggregate-add-third-party</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<outputDirectory>${project.build.directory}</outputDirectory>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20190722</version>
 		</dependency>
-
 	</dependencies>
 </project>

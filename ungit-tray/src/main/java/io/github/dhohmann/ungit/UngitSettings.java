@@ -50,7 +50,7 @@ public class UngitSettings {
 		settings = new JSONObject(new JSONTokener(new FileInputStream(file)));
 		applyDefaults();
 	}
-
+	
 	private void applyDefaults() {
 		InputStream stream = UngitSettings.class.getResourceAsStream("ungit-defaults.json");
 		JSONObject defaults = new JSONObject(new JSONTokener(stream));
@@ -67,7 +67,7 @@ public class UngitSettings {
 	 * @return Port the ungit server is running at
 	 */
 	public int getPort() {
-		return settings.getInt(PORT);
+		return settings.optInt(PORT, 8888);
 	}
 
 	/**
@@ -76,7 +76,11 @@ public class UngitSettings {
 	 * @return Url base setting
 	 */
 	public String getURLBase() {
-		return settings.getString(URLBASE);
+		return settings.optString(URLBASE, null);
+	}
+	
+	public String getLogDirectory() {
+		return settings.optString("logDirectory", null);
 	}
 
 }
